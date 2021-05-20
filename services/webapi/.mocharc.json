@@ -1,0 +1,6 @@
+{
+    "$schema": "https://json.schemastore.org/mocharc",
+    "color": true,
+    "extension": ["js"],
+    "spec": "./dist/test/**/*.js"
+}

@@ -1,0 +1,4 @@
+AZURE_LOCATION: "northeurope"
+RESOURCE_NAME_PREFIX: "nodewebapi"
+ENVIRONMENT_TAG: "test"
+WEBAPI_NODE_ENV: "development"

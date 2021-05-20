@@ -1,0 +1,93 @@
+#!/usr/bin/env node
+
+const fs = require('fs/promises');
+const path = require('path');
+const process = require('process');
+
+const secretsPath = '/workspace/.local/secrets';
+const encodingOptions = { encoding: 'utf8' };
+
+async function directoryExists(path) {
+    try {
+        const stat = await fs.stat(path);
+
+        if (stat.isDirectory()) {
+            return true;
+        }
+    }
+    catch {
+        // NOTE: If the directory doesn't exist, stat() will throw.
+    }
+
+    return false;
+}
+
+async function go() {   
+    console.info('Generating SQLTools extension connection settings...');
+
+    try {
+        const homePath = process.env.HOME;
+        
+        // Codespaces uses $HOME/.vscode-remote
+        let vscodePath = path.join(homePath, '.vscode-remote');
+
+        if (!await directoryExists(vscodePath)) {
+            // Dev Containers use $HOME/.vscode-server
+            vscodePath = path.join(homePath, '.vscode-server');
+
+            if (!await directoryExists(vscodePath)) {
+                throw new Error('Unable to determine the VS Code path.');
+            }
+        }
+
+        const server = process.env.PGHOST;
+        const port = parseInt(process.env.PGPORT, 10);
+        const database = await fs.readFile(path.join(secretsPath, 'postgres_db.txt'), encodingOptions);
+        const password = await fs.readFile(path.join(secretsPath, 'postgres_password.txt'), encodingOptions);
+        const username = await fs.readFile(path.join(secretsPath, 'postgres_user.txt'), encodingOptions);
+        
+        const machineSettingsPath = path.join(vscodePath, 'data', 'Machine', 'settings.json');
+
+        let existingJson;
+
+        try {
+            const settingsStat = await fs.stat(machineSettingsPath);
+            
+            if (settingsStat.isFile()) {
+                const existingContent = await fs.readFile(machineSettingsPath, encodingOptions);
+                
+                existingJson = JSON.parse(existingContent);
+            }
+        }
+        catch {
+            // NOTE: If the file doesn't exist, stat() will throw.
+        }
+
+        existingJson = existingJson || {};
+
+        existingJson['sqltools.connections'] = [
+            {
+                name: 'WebAPI DB',
+                driver: 'PostgreSQL',
+                previewLimit: 50,
+                server,
+                port,
+                database,
+                username,
+                password
+            }
+        ];
+
+        // Ensure directory exists...
+        await fs.mkdir(path.dirname(machineSettingsPath), { recursive: true });
+
+        // Create (or update) settings file...
+        await fs.writeFile(machineSettingsPath, JSON.stringify(existingJson, null, 4), encodingOptions);
+
+        console.info('Generated SQLTools extension connection settings at: ' + machineSettingsPath);
+    } catch (err) {
+        console.warn('Unable to generate the SQLTools extension connection settings: ' + err.toString());
+    }
+}
+
+go();

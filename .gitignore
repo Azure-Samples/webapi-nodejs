@@ -1,0 +1,15 @@
+
+# Mac finder
+.DS_Store
+
+# All ndoe modules
+node_modules
+
+# bicep compiled ARM files are ignored
+/deploy/infra/**/*.json
+
+# JS distribution bundles
+dist/
+
+# local tmp store
+.local/

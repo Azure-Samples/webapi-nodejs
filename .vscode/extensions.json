@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+		"dbaeumer.vscode-eslint",
+		"mtxr.sqltools",
+		"mtxr.sqltools-driver-pg",
+		"ms-azuretools.vscode-bicep",
+		"ms-azuretools.vscode-docker",
+		"redhat.vscode-yaml"
+    ]
+}

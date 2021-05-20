@@ -1,0 +1,17 @@
+#!/bin/bash
+set -x #echo on
+
+echo "Running webapi pre-init script..."
+
+# Create secrets
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+WORKSPACE_DIR="${SCRIPT_DIR}/../.."
+
+mkdir -p "${WORKSPACE_DIR}/.local/secrets"
+
+DOCKER_TAG=ghtools.azurecr.io/vp-cli:0.1.2-alpha
+
+docker run -i --mount "type=bind,src=${WORKSPACE_DIR},dst=/workspace" --rm ${DOCKER_TAG} ./vp batch --configuration /workspace/scripts/webapi/pre-init.json --context /workspace
+
+echo "Completed pre-init script."

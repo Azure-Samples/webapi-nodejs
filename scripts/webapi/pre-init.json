@@ -1,0 +1,7 @@
+{
+    "operations": [
+        { "type": "generate", "template": "scripts/webapi/templates/postgres_db.txt", "destination": ".local/secrets/postgres_db.txt" },
+        { "type": "generate", "template": "scripts/webapi/templates/postgres_password.txt", "destination": ".local/secrets/postgres_password.txt" },
+        { "type": "generate", "template": "scripts/webapi/templates/postgres_user.txt", "destination": ".local/secrets/postgres_user.txt" }
+    ]
+}

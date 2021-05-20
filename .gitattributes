@@ -1,0 +1,2 @@
+# Most files should use LF (as Linux is the primary target).
+* text=auto eol=lf
