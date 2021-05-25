@@ -8,6 +8,9 @@ param logAnalyticsName string
 param appInsightsName string
 param dbServerName string
 param dbName string
+param kubeEnvironmentId string = ''
+param customLocationId string = ''
+param arcLocation string = ''
 
 module monitoring './webapi/monitoring.bicep' = {
   name: 'monitoringDeploy'
@@ -29,8 +32,8 @@ module db './webapi/db.bicep' = {
   }
 }
 
-module webApi './webapi/webapp.bicep' = {
-  name: 'webAppDeploy'
+module webApiAzure './webapi/webappAzure.bicep' = if (customLocationId == '') {
+  name: 'webAppAzureDeploy'
   params: {
     location: location
     workspaceId: monitoring.outputs.workspaceId
@@ -45,7 +48,25 @@ module webApi './webapi/webapp.bicep' = {
   }
 }
 
-output webapiId string = webApi.outputs.webApiId
+module webApiArc './webapi/webappArc.bicep' = if (customLocationId != '') {
+  name: 'webAppArcDeploy'
+  params: {
+    location: arcLocation
+    kubeEnvironmentId: kubeEnvironmentId
+    customLocationId: customLocationId
+    workspaceId: monitoring.outputs.workspaceId
+    appSettingsPgHost: db.outputs.pgHost
+    appSettingsPgUser: db.outputs.pgUser
+    appSettingsPgDb: db.outputs.pgDb
+    appSettingsNodeEnv: webapiNodeEnv
+    appSettingsPgPassword: postgresAdminPassword
+    appSettingsInsightsKey: monitoring.outputs.instrumentationKey
+    webApiHostingPlanName: webApiHostingPlanName
+    webApiName: webApiName
+  }
+}
+
+output webapiId string = customLocationId == '' ? webApiAzure.outputs.webApiId : webApiArc.outputs.webApiId
 output postgresHost string = db.outputs.pgHost
 output postgresUser string = db.outputs.pgUser
 output postgresDb string = db.outputs.pgDb

@@ -6,7 +6,7 @@ set -o pipefail
 usage()
 {
     cat <<END
-Usage: install --resource-name-prefix <resource name prefix> --environment-tag <environment tag> --location <Azure region> --resource-group-tag <resource group tag> [--overwrite] [--resource-group-name <resource group name>] [--node-env <node environment>]
+Usage: install --resource-name-prefix <resource name prefix> --environment-tag <environment tag> --location <Azure region> --resource-group-tag <resource group tag> [--overwrite] [--resource-group-name <resource group name>] [--node-env <node environment>] [--kube-environment-id <kube environment id>] [--custom-location-id <custom location id>] [--arc-location <arc location>]
 
 Deploys the node-webapi sample to specified Azure region by performing the following steps:
   1. Create resource group for the application.
@@ -21,6 +21,12 @@ Options:
     Use specified name for the resource group instead of default one.
   --node-env <node environment>
     Forces the use of specific node environment as the application runtime setting (default: development).
+  --kube-environment-id <kube environment id>
+    Provide the kube environment id to deploy to Arc
+  --custom-location-id <custom location id>
+    Provide the custome location id to deploy to Arc
+  --arc-location <arc location>
+    Provide the location for Arc deployed resources
 
 Example invocation: install --resource-name-prefix webapi --environment-tag dev --location westus2 --resource-group-tag 20210506a
 
@@ -75,6 +81,9 @@ region=''
 rg_tag=''
 node_env='development'
 resource_group_name=''
+kube_environment_id=''
+custom_location_id=''
+arc_location=''
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -92,6 +101,12 @@ while [[ $# -gt 0 ]]; do
             resource_group_name="$2"; shift 2 ;;
         --node-env )
             node_env="$2"; shift 2 ;;
+        --kube-environment-id )
+            kube_environment_id="$2"; shift 2 ;;
+        --custom-location-id )
+            custom_location_id="$2"; shift 2 ;;
+        --arc-location )
+            arc_location="$2"; shift 2 ;;
         -h | --help )
             usage; exit 2 ;;
         *)
@@ -189,13 +204,18 @@ dbServerName=${resource_names[4]}
 dbName=${resource_names[5]}
 
 # Runs bicep deployment
+if [[ $custom_location_id == '' ]]; then
+    templateFile='main.bicep'
+else
+    templateFile='main.json'
+fi
+
 echo "Running ARM deployment..."
-az bicep install
 postgres_password=$(get_postgres_pwd)
 deployment_result=$(az deployment group create \
     --resource-group "$resource_group_name" \
     --name "$deployment_name" \
-    --template-file "${workspace_dir}/deploy/infra/main.bicep" \
+    --template-file "${workspace_dir}/deploy/infra/${templateFile}" \
     --parameters location=${region} \
         postgresAdminPassword=${postgres_password} \
         webApiHostingPlanName=${webApiHostingPlanName} \
@@ -204,7 +224,10 @@ deployment_result=$(az deployment group create \
         appInsightsName=${appInsightsName} \
         dbServerName=${dbServerName} \
         dbName=${dbName} \
-        webapiNodeEnv=${node_env})
+        webapiNodeEnv=${node_env} \
+        kubeEnvironmentId=${kube_environment_id} \
+        customLocationId=${custom_location_id} \
+        arcLocation=${arc_location})
 if [[ $? -ne 0 ]]; then
     echo "Deployment failed"
     exit 7
@@ -236,10 +259,16 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # Runs webapi deployment
+if [[ $custom_location_id == '' ]]; then
+    appFile='webapi.zip'
+else
+    appFile='webapi-full.zip'
+fi
+
 echo "Deploying the website..."
 az webapp deployment source config-zip \
     --ids "$web_api_id" \
-    --src "${workspace_dir}/output/app/webapi.zip"
+    --src "${workspace_dir}/output/app/${appFile}"
 if [[ $? -ne 0 ]]; then
     echo "Website deployment failed"
     exit 9

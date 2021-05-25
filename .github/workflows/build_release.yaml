@@ -77,16 +77,18 @@ jobs:
       - name: Build app for production
         run: npm ci --only=production --prefix services/webapi/
 
-      - name: Package application
+      - name: Package application without node_modules
         run: npm run package --prefix services/webapi
+
+      - name: Package application with node_modules for Arc deployment
+        run: npm run package-full --prefix services/webapi
 
       - name: Upload application zip package
         uses: actions/upload-artifact@v2
         with:
           name: app
-          path: ./output/app/webapi.zip
+          path: ./output/app/*.zip
           retention-days: 7
-
 
   validate_bicep:
     name: "Validate Bicep files"
@@ -95,10 +97,14 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v2
 
-      - name: Validate that bicep builds
-        run: az bicep build -f main.bicep
-        working-directory: ./deploy/infra
+      - name: Install pre-release bicep
+        run: |
+          curl -L https://nightly.link/Azure/bicep/actions/artifacts/62679913.zip --output bicep.zip
+          sudo unzip bicep.zip bicep -d /usr/local/bin && sudo chmod +x /usr/local/bin/bicep
 
+      - name: Validate that bicep builds
+        run: bicep build main.bicep
+        working-directory: ./deploy/infra
 
   deploy:
     name: 'Deploy'
@@ -138,6 +144,15 @@ jobs:
         with:
           path: ./output
 
+      - name: Install pre-release bicep
+        run: |
+          curl -L https://nightly.link/Azure/bicep/actions/artifacts/62679913.zip --output bicep.zip
+          sudo unzip bicep.zip bicep -d /usr/local/bin && sudo chmod +x /usr/local/bin/bicep
+
+      - name: Build bicep for Arc
+        run: bicep build main.bicep
+        working-directory: ./deploy/infra
+
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -157,3 +172,6 @@ jobs:
           --location "${{fromJson(env.config).AZURE_LOCATION }}" 
           --resource-group-tag "$GITHUB_REPOSITORY" 
           --node-env "${{fromJson(env.config).WEBAPI_NODE_ENV }}"
+          --kube-environment-id "${{fromJson(env.config).KUBE_ENVIRONMENT_ID }}"
+          --custom-location-id "${{fromJson(env.config).CUSTOM_LOCATION_ID }}"
+          --arc-location "${{fromJson(env.config).ARC_LOCATION }}"
