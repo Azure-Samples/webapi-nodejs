@@ -9,7 +9,7 @@ products:
 description: Get started quickly with Express and PostgreSQL (apptemplate)
 ---
 
-# WebAPI with Database using Node.js and PostgreSQL
+# Application Template for WebAPI and Database using Node.js and PostgreSQL
 
 This repository contains a template of an application built for the Azure Application Platform. This template is built to make it easy to dive straight into implementing business logic without having to spend time on setting up an engineering system for your application. The templates give you a starting point, while providing the option to change and extend any of the pre-configured components to suit your needs. The template makes use of an opinionated pattern that Microsoft recommends.
 
