@@ -9,60 +9,31 @@ This template supports deployment to Azure Arc. The following document lists the
 
 ## Prerequisites
 
-In order to deploy this template to Azure Arc, you need to have the Arc-enabled Kubernetes Cluster created. This template assumes this has already been done. To learn more about configuring an Arc environment for App Service, please see this [blog](https://aka.ms/ArcEnabledAppServices-Build2021-Blog)
+In order to deploy this template to Azure Arc, you need to have the Arc-enabled Kubernetes Cluster created. This template assumes this has already been done. To learn more about configuring an Arc environment for App Service, please see this [blog](https://aka.ms/ArcEnabledAppServices-Build2021-Blog).
+
+It's also requred to have Arc-enabled dataservices Data Controller installed in the Arc Cluster, please see more [here](https://docs.microsoft.com/en-us/azure/azure-arc/data/create-data-controller). This repository assumes a directly connected data controller.
 
 ## Regions and resource group support
 
-The following is a list of regions supported:
+[Please check here for latest information](https://docs.microsoft.com/en-us/azure/azure-arc/kubernetes/quickstart-connect-cluster) 
 
-| Resource | Regions | Other requirements |
-| --- | --- | ---- |
-| Kubernetes cluster | anywhere | none |
-| Kubernetes - Azure Arc | East US | none |
-| Log Analytics | anywhere - preferably close to the Kubernetes clusters | none |
-| Custom Location | East US or West Europe | none |
-| App Service Kubernetes Environment | East US or West Europe | none |
-| App Plan | East US or West Europe | none |
-| Web Site | East US or West Europe | Has to be in same resource group as the App Plan |
-
-
-### Azure Arc enabled App Service
+### Azure Arc enabled App Service and Data Services
 
 Following these guidelines will deploy the webapi to an ARC-enabled Kubernetes cluster.
 
-For local development the following is needed:
+To deploy from local environment run the deployment script
 
-1. Get updated bicep tools
-   1. CLI:
-      1. Download CLI (7aca810747) https://github.com/Azure/bicep/suites/2816103963/artifacts/62679913
-         Using nightly.link because GitHub requires authentication to download artifacts --> https://github.com/actions/upload-artifact/issues/51
-         `curl -L https://nightly.link/Azure/bicep/actions/artifacts/62679913.zip --output bicep.zip`
-      1. Check integrity - sha256sum expected: 6179da0ac8e1bebea8f9101cb9f3a40ad1bc06b04355698043d5c83be9f28f15
-         `echo 6179da0ac8e1bebea8f9101cb9f3a40ad1bc06b04355698043d5c83be9f28f15 bicep.zip | sha256sum --check`
-      1. Unzip to path and change permissions
-         `sudo unzip bicep.zip bicep -d /usr/local/bin && sudo chmod +x /usr/local/bin/bicep`
-      1. Check version --> Bicep CLI version 0.3.602 (7aca810747)
-         `bicep -v`
-   1. TBD - VS Code extension and language server
-
-To deploy from local environment do the following:
-
-1. ARM for Plan and app in the template repo
-   1. Build bicep
-      `bicep build ./deploy/infra/main.bicep`
-   1. Install and build web app, as we have no Oryx / SCM build support on Lima
-      `npm install && npm run build --prefix services/webapi && npm run package-full --prefix services/webapi`
-   1. Run install
-      ```
-      ./deploy/scripts/install.sh \
-         --resource-name-prefix <rg name> --environment-tag <name tag> \
-         --resource-group-tag <RG tag> \
-         --location <rg ans Azure resource location> \
-         --node-env development \
-         --kube-environment-id <kubeEnv-id> \
-         --custom-location-id <customLocation-id> \
-         --arc-location <local of kubeenvironment resource>
-      ```
+```
+./deploy/scripts/install.sh \
+   --resource-name-prefix <resource group name> \
+   --environment-tag <name tag for all resources> \
+   --resource-group-tag <tag> \
+   --location <location (eastus or westeurope)> \
+   --node-env development \
+   --kube-environment-id <kubeEnvironmentId> \
+   --custom-location-id <customLocationId> \
+   --data-controller-id <dataControlleId>
+```
 
 To deploy using the GitHub Actions Workflow, the following is needed in the [config.yaml](../deploy/config.yaml) file:
 
@@ -73,5 +44,5 @@ ENVIRONMENT_TAG: "test"             #Resource tag
 WEBAPI_NODE_ENV: "development"      #nodeEnv parameter
 KUBE_ENVIRONMENT_ID: ""             #kubeEnvironmentId to host the webapi on Arc
 CUSTOM_LOCATION_ID: ""              #customLocationId for the kubeEnvironment
-ARC_LOCATION: ""                    #Location of the Arc resources - e.g. Web App
+DATA_CONTROLLER_ID: ""              #dataControllerId
 ```

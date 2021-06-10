@@ -25,6 +25,7 @@ The template provides:
 - [A pre-configured development environment](/docs/concepts.md#development-environment)
 - [An application](/docs/concepts.md#the-application)
 - [Build and Deployment automation](/docs/concepts.md#build-and-deployment)
+- [Deploy to Azure Arc](/docs/azure_arc.md)
 
 To get started using the template, we recommend following the [Quickstart](docs/quickstart.md).
 
