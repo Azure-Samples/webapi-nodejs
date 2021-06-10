@@ -6,7 +6,7 @@ set -o pipefail
 usage()
 {
     cat <<END
-Usage: install --resource-name-prefix <resource name prefix> --environment-tag <environment tag> --location <Azure region> --resource-group-tag <resource group tag> [--overwrite] [--resource-group-name <resource group name>] [--node-env <node environment>] [--kube-environment-id <kube environment id>] [--custom-location-id <custom location id>] [--arc-location <arc location>]
+Usage: install --resource-name-prefix <resource name prefix> --environment-tag <environment tag> --location <Azure region> --resource-group-tag <resource group tag> [--overwrite] [--resource-group-name <resource group name>] [--node-env <node environment>] [--kube-environment-id <kube environment id>] [--custom-location-id <custom location id>] [--data-controller-id <data controller id>]
 
 Deploys the node-webapi sample to specified Azure region by performing the following steps:
   1. Create resource group for the application.
@@ -25,8 +25,8 @@ Options:
     Provide the kube environment id to deploy to Arc
   --custom-location-id <custom location id>
     Provide the custome location id to deploy to Arc
-  --arc-location <arc location>
-    Provide the location for Arc deployed resources
+  --data-controller-id <data controller id>
+    Provide the ResourceId of the Data Controller
 
 Example invocation: install --resource-name-prefix webapi --environment-tag dev --location westus2 --resource-group-tag 20210506a
 
@@ -83,7 +83,7 @@ node_env='development'
 resource_group_name=''
 kube_environment_id=''
 custom_location_id=''
-arc_location=''
+data_controller_id=''
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -105,8 +105,8 @@ while [[ $# -gt 0 ]]; do
             kube_environment_id="$2"; shift 2 ;;
         --custom-location-id )
             custom_location_id="$2"; shift 2 ;;
-        --arc-location )
-            arc_location="$2"; shift 2 ;;
+        --data-controller-id )
+            data_controller_id="$2"; shift 2 ;;
         -h | --help )
             usage; exit 2 ;;
         *)
@@ -203,19 +203,12 @@ appInsightsName=${resource_names[3]}
 dbServerName=${resource_names[4]}
 dbName=${resource_names[5]}
 
-# Runs bicep deployment
-if [[ $custom_location_id == '' ]]; then
-    templateFile='main.bicep'
-else
-    templateFile='main.json'
-fi
-
 echo "Running ARM deployment..."
 postgres_password=$(get_postgres_pwd)
 deployment_result=$(az deployment group create \
     --resource-group "$resource_group_name" \
     --name "$deployment_name" \
-    --template-file "${workspace_dir}/deploy/infra/${templateFile}" \
+    --template-file "${workspace_dir}/deploy/infra/main.bicep" \
     --parameters location=${region} \
         postgresAdminPassword=${postgres_password} \
         webApiHostingPlanName=${webApiHostingPlanName} \
@@ -227,7 +220,7 @@ deployment_result=$(az deployment group create \
         webapiNodeEnv=${node_env} \
         kubeEnvironmentId=${kube_environment_id} \
         customLocationId=${custom_location_id} \
-        arcLocation=${arc_location})
+        dataControllerId=${data_controller_id})
 if [[ $? -ne 0 ]]; then
     echo "Deployment failed"
     exit 7
@@ -237,17 +230,17 @@ fi
 echo "Deployment output: " $deployment_result
 
 web_api_id=$(echo "$deployment_result" | jq -r '.properties.outputs.webapiId.value')
-postgres_host=$(echo "$deployment_result" | jq -r '.properties.outputs.postgresHost.value')
 postgres_db=$(echo "$deployment_result" | jq -r '.properties.outputs.postgresDb.value')
 postgres_user=$(echo "$deployment_result" | jq -r '.properties.outputs.postgresUser.value')
+postgres_host_external=$(echo "$deployment_result" | jq -r '.properties.outputs.postgresHostExternal.value')
 
 # Copies database connection information to env. vars for the database migration script
 echo "Initializing the database..."
 export PGDB=$postgres_db
-export PGHOST=$postgres_host
-export PGUSER="${postgres_user}@${postgres_host}"
-export PGSSLMODE=require
+export PGUSER=$postgres_user
+export PGSSLMODE=allow
 export PGPASSWORD=$postgres_password
+export PGHOST=$postgres_host_external
 
 # Runs database migration and seeds the database
 npm run migrate_db --prefix=${webapi_src_dir}
@@ -262,6 +255,7 @@ fi
 if [[ $custom_location_id == '' ]]; then
     appFile='webapi.zip'
 else
+    # Currently needed as ORYX builds are not working on Arc
     appFile='webapi-full.zip'
 fi
 

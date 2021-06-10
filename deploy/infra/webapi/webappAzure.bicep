@@ -36,7 +36,7 @@ resource webApi 'Microsoft.Web/sites@2020-06-01' = {
       appSettings: [
         {
           name: 'PGHOST'
-          value: '${appSettingsPgHost}'
+          value: appSettingsPgHost
         }
         {
           name: 'PGUSER'
@@ -44,23 +44,23 @@ resource webApi 'Microsoft.Web/sites@2020-06-01' = {
         }
         {
           name: 'PGPASSWORD'
-          value: '${appSettingsPgPassword}'
+          value: appSettingsPgPassword
         }
         {
           name: 'PGDB'
-          value: '${appSettingsPgDb}'
+          value: appSettingsPgDb
         }
         {
           name: 'NODE_ENV'
-          value: '${appSettingsNodeEnv}'
+          value: appSettingsNodeEnv
         }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: '${appSettingsInsightsKey}'
+          value: appSettingsInsightsKey
         }
         {
           name: 'PGSSLMODE'
-          value: 'require'
+          value: 'allow'
         }
         {
           name: 'ENABLE_ORYX_BUILD'

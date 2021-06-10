@@ -12,14 +12,14 @@ param webApiName string
 param kubeEnvironmentId string
 param customLocationId string
 
-resource webApiHostingPlan 'Microsoft.Web/serverfarms@2020-12-01' = {
+resource webApiHostingPlan 'Microsoft.Web/serverfarms@2021-01-01' = {
   name: webApiHostingPlanName
   location: location
   kind: 'linux,kubernetes'
   sku: {
     name: 'K1'
     tier: 'Kubernetes'
-    capacity: 1
+    capacity: 1 // not required
   }
   extendedLocation: {
     type: 'CustomLocation'
@@ -35,7 +35,7 @@ resource webApiHostingPlan 'Microsoft.Web/serverfarms@2020-12-01' = {
   }
 }
 
-resource webApi 'Microsoft.Web/sites@2020-12-01' = {
+resource webApi 'Microsoft.Web/sites@2021-01-01' = {
   name: webApiName
   location: location
   kind: 'linux,kubernetes,app'
@@ -51,31 +51,31 @@ resource webApi 'Microsoft.Web/sites@2020-12-01' = {
       appSettings: [
         {
           name: 'PGHOST'
-          value: '${appSettingsPgHost}'
+          value: appSettingsPgHost
         }
         {
           name: 'PGUSER'
-          value: '${appSettingsPgUser}@${appSettingsPgHost}'
+          value: appSettingsPgUser
         }
         {
           name: 'PGPASSWORD'
-          value: '${appSettingsPgPassword}'
+          value: appSettingsPgPassword
         }
         {
           name: 'PGDB'
-          value: '${appSettingsPgDb}'
+          value: appSettingsPgDb
         }
         {
           name: 'NODE_ENV'
-          value: '${appSettingsNodeEnv}'
+          value: appSettingsNodeEnv
         }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: '${appSettingsInsightsKey}'
+          value: appSettingsInsightsKey
         }
         {
           name: 'PGSSLMODE'
-          value: 'require'
+          value: 'allow'
         }
         {
           name: 'ENABLE_ORYX_BUILD'

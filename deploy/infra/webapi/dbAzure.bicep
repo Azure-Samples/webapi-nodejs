@@ -1,6 +1,6 @@
 param location string
 param workspaceId string
-param administratorLogin string = 'postgres_admin'
+param administratorLogin string = 'postgres'
 @secure()
 param administratorLoginPassword string
 param dbServerName string

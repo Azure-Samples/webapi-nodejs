@@ -80,6 +80,7 @@ jobs:
       - name: Package application without node_modules
         run: npm run package --prefix services/webapi
 
+        # Currently needed as ORYX builds are not working on Arc
       - name: Package application with node_modules for Arc deployment
         run: npm run package-full --prefix services/webapi
 
@@ -97,13 +98,8 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v2
 
-      - name: Install pre-release bicep
-        run: |
-          curl -L https://nightly.link/Azure/bicep/actions/artifacts/62679913.zip --output bicep.zip
-          sudo unzip bicep.zip bicep -d /usr/local/bin && sudo chmod +x /usr/local/bin/bicep
-
       - name: Validate that bicep builds
-        run: bicep build main.bicep
+        run: az bicep build -f main.bicep
         working-directory: ./deploy/infra
 
   deploy:
@@ -144,15 +140,6 @@ jobs:
         with:
           path: ./output
 
-      - name: Install pre-release bicep
-        run: |
-          curl -L https://nightly.link/Azure/bicep/actions/artifacts/62679913.zip --output bicep.zip
-          sudo unzip bicep.zip bicep -d /usr/local/bin && sudo chmod +x /usr/local/bin/bicep
-
-      - name: Build bicep for Arc
-        run: bicep build main.bicep
-        working-directory: ./deploy/infra
-
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -174,4 +161,4 @@ jobs:
           --node-env "${{fromJson(env.config).WEBAPI_NODE_ENV }}"
           --kube-environment-id "${{fromJson(env.config).KUBE_ENVIRONMENT_ID }}"
           --custom-location-id "${{fromJson(env.config).CUSTOM_LOCATION_ID }}"
-          --arc-location "${{fromJson(env.config).ARC_LOCATION }}"
+          --data-controller-id "${{fromJson(env.config).DATA_CONTROLLER_ID }}"
