@@ -1,6 +1,7 @@
 import Umzug from 'umzug';
 import * as path from 'path';
 import db from '../db/db';
+import { checkDBConnection } from '../dbConnect';
 
 const umzug = new Umzug({
     storage: 'sequelize',
@@ -19,21 +20,12 @@ const umzug = new Umzug({
 
 export async function migrate() {
     console.log("Running migrations.");
-    
-    try {
-        console.log(`Trying to connect to: ${process.env.PGHOST}`);
-        await db.authenticate();
-        console.log(`Database connection OK!`);
-
-    } catch (error) {
-        console.log(`Unable to connect to the database:`);
-        console.log(error.message);
-    }
-
+    await checkDBConnection(10);
     await umzug.up();
 }
 
 export async function rollback() {
     console.log("Rollback migrations.");
+    await checkDBConnection(10);
     await umzug.down();
 }

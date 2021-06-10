@@ -1,6 +1,7 @@
 import Umzug from 'umzug';
 import * as path from 'path';
 import db from '../db/db';
+import { checkDBConnection } from '../dbConnect';
 
 const umzug = new Umzug({
     storage: 'sequelize',
@@ -20,10 +21,12 @@ const umzug = new Umzug({
 
 export async function seed() {
     console.log("Seeding the database.");
+    await checkDBConnection(10);
     await umzug.up();
 }
     
 export async function rollback() {
     console.log("Rollback seeds.");
+    await checkDBConnection(10);
     await umzug.down();
 }
