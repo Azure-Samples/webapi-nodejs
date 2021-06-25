@@ -94,7 +94,6 @@ resource postgreSQLServer 'Microsoft.AzureArcData/postgresInstances@2021-03-02-p
   }
 }
 
-//How do I get the Cluster-IP for the service? The below is the external IP
 output pgHost string = '${dbName}-external-svc'
 output pgHostExternal string = first(split(postgreSQLServer.properties.k8sRaw.status.primaryEndpoint,':'))
 output pgUser string = administratorLogin

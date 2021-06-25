@@ -94,7 +94,7 @@ resource webApi 'Microsoft.Web/sites@2021-01-01' = {
   }
 }
 
-resource webDiagnostics 'microsoft.insights/diagnosticSettings@2017-05-01-preview' = {
+resource webDiagnostics 'Microsoft.Insights/diagnosticSettings@2017-05-01-preview' = {
   scope: webApi
   name: 'logAnalytics-${webApiName}'
   properties: {

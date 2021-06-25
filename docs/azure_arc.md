@@ -15,11 +15,19 @@ It's also requred to have Arc-enabled dataservices Data Controller installed in 
 
 ## Regions and resource group support
 
-[Please check here for latest information](https://docs.microsoft.com/en-us/azure/azure-arc/kubernetes/quickstart-connect-cluster) 
+As some of the Arc features are still in preview, [please check here for latest information](https://docs.microsoft.com/en-us/azure/azure-arc/kubernetes/quickstart-connect-cluster) 
 
 ### Azure Arc enabled App Service and Data Services
 
 Following these guidelines will deploy the webapi to an ARC-enabled Kubernetes cluster.
+
+In order to deploy to an Custom Location with App and data services for Arc, you will need to collect the following information from those resource in Azure:
+
+- Resource id id of the custom location: customLocationId
+- Resource id id of the App Service Kubernetes Environment: kubeEnvironmentId
+- Resource id of the Azure Arc data controller: dataControllerId
+
+If any of these are provided, all need to be provided.
 
 To deploy from local environment run the deployment script
 
