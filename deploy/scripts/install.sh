@@ -22,11 +22,11 @@ Options:
   --node-env <node environment>
     Forces the use of specific node environment as the application runtime setting (default: development).
   --kube-environment-id <kube environment id>
-    Provide the kube environment id to deploy to Arc
+    For Arc deployment: Provide the ResourceId of the App Service Kubernetes Environment
   --custom-location-id <custom location id>
-    Provide the custome location id to deploy to Arc
+    For Arc deployment: Provide the ResourceId of the Custom location
   --data-controller-id <data controller id>
-    Provide the ResourceId of the Data Controller
+    For Arc deployment: Provide the ResourceId of the Data Controller
 
 Example invocation: install --resource-name-prefix webapi --environment-tag dev --location westus2 --resource-group-tag 20210506a
 
