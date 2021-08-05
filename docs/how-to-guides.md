@@ -30,7 +30,7 @@ The [`.devcontainer folder`](../.devcontainer/) contains all of the development 
 
 ## Troubleshooting issues when deploying to Azure
 
-Look at this article for troubleshooting a wide range of [common deployment errors](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/common-deployment-errors), when deploying to Azure.
+Look at this article for troubleshooting a wide range of [common deployment errors](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/common-deployment-errors) when deploying to Azure.
 
 Azure App Service documentation also provides information on troubleshooting deployment and application issues. This article is a good starting point: [Best practices and troubleshooting guide for node applications on Azure App Service Windows](https://docs.microsoft.com/en-us/azure/app-service/app-service-web-nodejs-best-practices-and-troubleshoot-guide).
 
@@ -54,10 +54,10 @@ You can change the `RESOURCE_NAME_PREFIX` and `ENVIRONMENT_TAG` attribute in the
 To add an additional service to this template, you need to ensure the following:
 
 1. Add the required Bicep definition for the Azure resource to host the service in the [infra folder](../deploy/infra/).
-1. Add a reference to the module in the [main.bicep file](../deploy/infra/main.bicep). To learn more about Bicep [take a look here](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/bicep-overview).
-1. Add the service code.
-1. To build your service as part of the [build-release workflow](../.github/workflows/build_release.yaml), add the required build job at the beginning of the workflow.
-1. For any additional actions required as part of deploying the service, you can add the required steps to the [install.sh script](../deploy/scripts/install.sh).
+2. Add a reference to the module in the [main.bicep file](../deploy/infra/main.bicep). To learn more about Bicep [take a look here](https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/bicep-overview).
+3. Add the service code.
+4. To build your service as part of the [build-release workflow](../.github/workflows/build_release.yaml), add the required build job at the beginning of the workflow.
+5. For any additional actions required as part of deploying the service, you can add the required steps to the [install.sh script](../deploy/scripts/install.sh).
 
 For more information about the build and release setup in the template, look [here](/docs/concepts.md#build-and-deployment).
 
